@@ -17,7 +17,7 @@ data class Inntekt(
   val datoFom: String,
   val datoTil: String?,
   val inntektType: String,
-  val belop: Integer
+  val belop: Int
 )
 
 data class Sivilstand(
@@ -31,5 +31,5 @@ data class BarnIHusstand(
   val rolle: String,
   val datoFom: String,
   val datoTil: String?,
-  val antall: Integer
+  val antall: Int
 )

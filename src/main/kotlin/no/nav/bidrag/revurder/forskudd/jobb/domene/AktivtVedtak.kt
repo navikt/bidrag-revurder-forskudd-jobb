@@ -37,10 +37,10 @@ data class AktivtVedtak(
   }
 
   private fun soknadsbarnetErUnder18Aar(virkningsdato: LocalDate): Boolean {
-    return Period.between(soknadsbarnFodselsdato, virkningsdato).getYears() < 18;
+    return Period.between(soknadsbarnFodselsdato, virkningsdato).getYears() < 18
   }
 
   private fun sisteManuelleVedtakErGammeltNok(sisteMuligeDatoForSisteVedtak: LocalDate): Boolean {
-    return (!(vedtakDatoSisteManuelleVedtak.isAfter(sisteMuligeDatoForSisteVedtak)));
+    return (!(vedtakDatoSisteManuelleVedtak.isAfter(sisteMuligeDatoForSisteVedtak)))
   }
 }
