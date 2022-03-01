@@ -1,0 +1,14 @@
+-- SKAL PLUKKES: Siste manuelle vedtak over 1 år siden; Barn under 11 år; BM gift; Bostatus med foreldre; Ingen unntakskoder
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 1, 'SAK-1', 'SOKNADSBARN-1', 'MOTTAKER-1', current_date - 100, current_date - 400, 'REVURDERING', 1283, 'NOK', 'ORDINAERT_FORSKUDD_75_PROSENT', 'GIFT', 2, 'MED_FORELDRE', current_date - 3000, false, 'REV-BATCH', current_timestamp);
+-- SKAL IKKE PLUKKES: Siste manuelle vedtak under 1 år siden; Barn over 11 år, men under 18 år; BM gift; Bostatus med foreldre; Ingen unntakskoder
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 2, 'SAK-2', 'SOKNADSBARN-2', 'MOTTAKER-2', current_date - 100, current_date - 100, 'MANUELT', 2138, 'NOK', 'FORHOYET_FORSKUDD_11_AAR_125_PROSENT', 'GIFT', 1, 'MED_FORELDRE', current_date - 5000, false, 'SAKSBEHANDLER', current_timestamp);
+-- SKAL IKKE PLUKKES: Siste manuelle vedtak over 1 år siden; Barn over 11 år, men under 18 år; BM gift; Bostatus alene; Unntakskode
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 3, 'SAK-3', 'SOKNADSBARN-3', 'MOTTAKER-3', current_date - 100, current_date - 400, 'REVURDERING', 2138, 'NOK', 'FORHOYET_FORSKUDD_11_AAR_125_PROSENT', 'GIFT', 3, 'ALENE', current_date - 5000, true, 'REV-BATCH', current_timestamp);
+-- SKAL PLUKKES: Siste manuelle vedtak over 1 år siden; Barn over 11 år, men under 18 år; BM gift; Bostatus med foreldre; Ingen unntakskoder
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 4, 'SAK-4', 'SOKNADSBARN-4', 'MOTTAKER-4', current_date - 10, current_date - 400, 'INDEKSREGULERING', 2138, 'NOK', 'FORHOYET_FORSKUDD_11_AAR_125_PROSENT', 'GIFT', 1, 'MED_FORELDRE', current_date - 5000, false, 'IR-BATCH', current_timestamp);
+-- SKAL IKKE PLUKKES: Siste manuelle vedtak over 1 år siden; Barn over 18 år; BM enslig; Bostatus med foreldre; Ingen unntakskoder
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 5, 'SAK-5', 'SOKNADSBARN-5', 'MOTTAKER-5', current_date - 10, current_date - 400, 'INDEKSREGULERING', 1710, 'NOK', 'FORHOYET_FORSKUDD_100_PROSENT', 'ENSLIG', 2, 'MED_FORELDRE', current_date - 6600, false, 'IR-BATCH', current_timestamp);
+-- SKAL PLUKKES: Siste manuelle vedtak over 1 år siden; Barn under 11 år; BM gift; Bostatus med foreldre; Ingen unntakskoder
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 6, 'SAK-6', 'SOKNADSBARN-6', 'MOTTAKER-6', current_date - 100, current_date - 400, 'REVURDERING', 1710, 'NOK', 'FORHOYET_FORSKUDD_100_PROSENT', 'GIFT', 2, 'MED_FORELDRE', current_date - 3000, false, 'REV-BATCH', current_timestamp);
+-- SKAL PLUKKES: Siste manuelle vedtak over 1 år siden; Barn under 11 år; BM enslig; Bostatus med foreldre; Ingen unntakskoder
+INSERT INTO aktivt_vedtak VALUES (DEFAULT, 7, 'SAK-7', 'SOKNADSBARN-7', 'MOTTAKER-7', current_date - 100, current_date - 400, 'REVURDERING', 1710, 'NOK', 'FORHOYET_FORSKUDD_100_PROSENT', 'SAMBOER', 2, 'MED_FORELDRE', current_date - 3000, false, 'REV-BATCH', current_timestamp);

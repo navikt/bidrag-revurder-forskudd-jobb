@@ -1,0 +1,4 @@
+Vedtak med vedtakId 1 og løpende forskudd 1283: Forslag om å sette opp løpende forskudd til 1710, med resultatkode FORHOYET_FORSKUDD_100_PROSENT
+Vedtak med vedtakId 4 og løpende forskudd 2138: Forslag om å sette ned løpende forskudd til 1710, med resultatkode FORHOYET_FORSKUDD_100_PROSENT
+Vedtak med vedtakId 6 og løpende forskudd 1710: Forslag om å beholde eksisterende løpende forskudd
+Vedtak med vedtakId 7 og løpende forskudd 1710: Forslag om opphør fordi nytt beregnet beløp er 0

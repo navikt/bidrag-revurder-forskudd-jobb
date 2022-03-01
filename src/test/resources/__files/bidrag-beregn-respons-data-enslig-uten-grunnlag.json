@@ -1,0 +1,15 @@
+{
+  "beregnetForskuddPeriodeListe": [
+    {
+      "periode": {
+        "datoFom": "2020-12-01",
+        "datoTil": null
+      },
+      "resultat": {
+        "belop": 0,
+        "kode": "AVSLAG",
+        "regel": "REGEL 6"
+      }
+    }
+  ]
+}

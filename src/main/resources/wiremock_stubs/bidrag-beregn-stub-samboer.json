@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/bidrag-beregn/.*",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$..*",
+          "contains": "SAMBOER"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "bidrag-beregn-respons-data-samboer-uten-grunnlag.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

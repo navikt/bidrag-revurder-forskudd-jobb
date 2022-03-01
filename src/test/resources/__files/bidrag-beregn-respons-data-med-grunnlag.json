@@ -1,0 +1,139 @@
+{
+  "beregnetForskuddPeriodeListe": [
+    {
+      "periode": {
+        "datoFom": "2020-12-01",
+        "datoTil": null
+      },
+      "resultat": {
+        "belop": 2090,
+        "kode": "FORHOYET_FORSKUDD_11_AAR_125_PROSENT",
+        "regel": "REGEL 7"
+      },
+      "grunnlagReferanseListe": [
+        "Mottatt_Inntekt_AG_20201201",
+        "Mottatt_Sivilstand_20201201",
+        "Mottatt_GenerellInfo",
+        "Mottatt_Bostatus_20201201",
+        "Sjablon_Forskuddssats75ProsentBeløp_20200701",
+        "Sjablon_ForskuddssatsBeløp_20200701",
+        "Sjablon_MaksInntektForskuddMottakerMultiplikator_20030101",
+        "Sjablon_ØvreInntektsgrenseFulltForskuddBeløp_20200701",
+        "Sjablon_ØvreInntektsgrense75ProsentForskuddEnBeløp_20200701",
+        "Sjablon_ØvreInntektsgrense75ProsentForskuddGSBeløp_20200701",
+        "Sjablon_InntektsintervallForskuddBeløp_20200701"
+      ]
+    }
+  ],
+  "grunnlagListe": [
+    {
+      "referanse": "Mottatt_GenerellInfo",
+      "type": "GenerellInfo",
+      "innhold": {
+        "rolle": "SB",
+        "fodselsdato": "2006-02-01"
+      }
+    },
+    {
+      "referanse": "Mottatt_Bostatus_20201201",
+      "type": "Bostatus",
+      "innhold": {
+        "rolle": "SB",
+        "datoFom": "2020-12-01",
+        "datoTil": "2021-01-01",
+        "bostatusKode": "MED_FORELDRE"
+      }
+    },
+    {
+      "referanse": "Mottatt_Inntekt_AG_20201201",
+      "type": "Inntekt",
+      "innhold": {
+        "rolle": "BM",
+        "datoFom": "2020-12-01",
+        "datoTil": "2021-01-01",
+        "inntektType": "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",
+        "belop": 290000
+      }
+    },
+    {
+      "referanse": "Mottatt_Sivilstand_20201201",
+      "type": "Sivilstand",
+      "innhold": {
+        "rolle": "BM",
+        "datoFom": "2020-12-01",
+        "datoTil": "2021-01-01",
+        "sivilstandKode": "GIFT"
+      }
+    },
+    {
+      "referanse": "Sjablon_Forskuddssats75ProsentBeløp_20200701",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2020-07-01",
+        "datoTil": "2021-07-01",
+        "sjablonNavn": "Forskuddssats75ProsentBeløp",
+        "sjablonVerdi": 1250
+      }
+    },
+    {
+      "referanse": "Sjablon_ForskuddssatsBeløp_20200701",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2020-07-01",
+        "datoTil": "2021-07-01",
+        "sjablonNavn": "ForskuddssatsBeløp",
+        "sjablonVerdi": 1670
+      }
+    },
+    {
+      "referanse": "Sjablon_MaksInntektForskuddMottakerMultiplikator_20030101",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2003-01-01",
+        "datoTil": "9999-12-31",
+        "sjablonNavn": "MaksInntektForskuddMottakerMultiplikator",
+        "sjablonVerdi": 320
+      }
+    },
+    {
+      "referanse": "Sjablon_ØvreInntektsgrenseFulltForskuddBeløp_20200701",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2020-07-01",
+        "datoTil": "2021-07-01",
+        "sjablonNavn": "ØvreInntektsgrenseFulltForskuddBeløp",
+        "sjablonVerdi": 297500
+      }
+    },
+    {
+      "referanse": "Sjablon_ØvreInntektsgrense75ProsentForskuddEnBeløp_20200701",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2020-07-01",
+        "datoTil": "2021-07-01",
+        "sjablonNavn": "ØvreInntektsgrense75ProsentForskuddEnBeløp",
+        "sjablonVerdi": 468500
+      }
+    },
+    {
+      "referanse": "Sjablon_ØvreInntektsgrense75ProsentForskuddGSBeløp_20200701",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2020-07-01",
+        "datoTil": "2021-07-01",
+        "sjablonNavn": "ØvreInntektsgrense75ProsentForskuddGSBeløp",
+        "sjablonVerdi": 360800
+      }
+    },
+    {
+      "referanse": "Sjablon_InntektsintervallForskuddBeløp_20200701",
+      "type": "Sjablon",
+      "innhold": {
+        "datoFom": "2020-07-01",
+        "datoTil": "2021-07-01",
+        "sjablonNavn": "InntektsintervallForskuddBeløp",
+        "sjablonVerdi": 69100
+      }
+    }
+  ]
+}

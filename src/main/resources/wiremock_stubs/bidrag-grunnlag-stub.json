@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/bidrag-grunnlag/.*"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "bidrag-grunnlag-respons-data.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

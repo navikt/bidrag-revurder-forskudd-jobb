@@ -1,0 +1,67 @@
+{
+  "grunnlagspakkeId": 1,
+  "ainntektListe": [
+    {
+      "personId": "1",
+      "periodeFra": "2022-01-01",
+      "periodeTil": "2022-02-01",
+      "aktiv": true,
+      "brukFra": "2022-02-25T10:19:31.289Z",
+      "brukTil": null,
+      "hentetTidspunkt": "2022-02-25T10:19:31.289Z",
+      "ainntektspostListe": [
+        {
+          "utbetalingsperiode": "2022-01",
+          "opptjeningsperiodeFra": null,
+          "opptjeningsperiodeTil": null,
+          "opplysningspliktigId": "928497704",
+          "virksomhetId": "896929119",
+          "inntektType": "LOENNSINNTEKT",
+          "fordelType": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "belop": 24800,
+          "etterbetalingsperiodeFra": null,
+          "etterbetalingsperiodeTil": null
+        }
+      ]
+    },
+    {
+      "personId": "1",
+      "periodeFra": "2022-02-01",
+      "periodeTil": "2022-03-01",
+      "aktiv": true,
+      "brukFra": "2022-02-25T10:19:31.289Z",
+      "brukTil": null,
+      "hentetTidspunkt": "2022-02-25T10:19:31.289Z",
+      "ainntektspostListe": [
+        {
+          "utbetalingsperiode": "2022-02",
+          "opptjeningsperiodeFra": null,
+          "opptjeningsperiodeTil": null,
+          "opplysningspliktigId": "928497704",
+          "virksomhetId": "896929119",
+          "inntektType": "LOENNSINNTEKT",
+          "fordelType": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "belop": 25200,
+          "etterbetalingsperiodeFra": null,
+          "etterbetalingsperiodeTil": null
+        }
+      ]
+    }
+  ],
+  "persondata": {
+    "personIdMottaker": "1",
+    "personIdSoknadsbarn": "1",
+    "periodeFra": "2022-01-01",
+    "periodeTil": "2022-03-01",
+    "aktiv": true,
+    "brukFra": "2022-02-25T10:19:31.289Z",
+    "brukTil": null,
+    "mottakerSivilstand": "ENSLIG",
+    "mottakerAntallBarnIHusstand": 2,
+    "soknadsbarnBostatus": "MED_FORELDRE",
+    "soknadsbarnFodselsdato": "2012-05-21",
+    "hentetTidspunkt": "2020-02-25T10:19:31.289Z"
+  }
+}

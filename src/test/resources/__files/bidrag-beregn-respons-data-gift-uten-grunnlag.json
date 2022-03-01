@@ -1,0 +1,15 @@
+{
+  "beregnetForskuddPeriodeListe": [
+    {
+      "periode": {
+        "datoFom": "2020-12-01",
+        "datoTil": null
+      },
+      "resultat": {
+        "belop": 1710,
+        "kode": "FORHOYET_FORSKUDD_100_PROSENT",
+        "regel": "REGEL 7"
+      }
+    }
+  ]
+}
