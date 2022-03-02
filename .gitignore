@@ -1,14 +1,9 @@
-<<<<<<< HEAD
-# log files
-*.log
-
-# IntelliJ and maven
-**/*.iml
 .idea/*
-**/target
-
+**/target/*
+**/*.iml
 .classpath
 .project
 .settings/
 .vscode/
-.DS_Store
+/target/
+/src/main/resources/filer/vedtakforslag.txt
