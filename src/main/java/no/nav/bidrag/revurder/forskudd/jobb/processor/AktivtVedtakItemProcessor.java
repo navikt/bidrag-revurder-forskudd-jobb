@@ -2,6 +2,7 @@ package no.nav.bidrag.revurder.forskudd.jobb.processor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +10,13 @@ import java.util.Optional;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.api.BeregnForskuddGrunnlag;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.api.BeregnetForskuddResultat;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.api.Grunnlag;
-import no.nav.bidrag.revurder.forskudd.jobb.beregn.consumer.BeregnConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.dto.BarnIHusstand;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.dto.Bostatus;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.dto.GenerellInfo;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.dto.Inntekt;
 import no.nav.bidrag.revurder.forskudd.jobb.beregn.dto.Sivilstand;
+import no.nav.bidrag.revurder.forskudd.jobb.consumer.beregn.BeregnConsumer;
+import no.nav.bidrag.revurder.forskudd.jobb.consumer.grunnlag.GrunnlagConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.AktivtVedtak;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.JobbParameter;
 import no.nav.bidrag.revurder.forskudd.jobb.enums.BeregnForskuddGrunnlagType;
@@ -27,7 +29,6 @@ import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentAinntektResponse;
 import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentKomplettGrunnlagspakkeResponse;
 import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentPersondataResponse;
 import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentSkattegrunnlagResponse;
-import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.consumer.GrunnlagConsumer;
 import org.springframework.batch.item.ItemProcessor;
 
 public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, String> {
@@ -46,8 +47,16 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   public String process(AktivtVedtak aktivtVedtak) {
 
     if (!(aktivtVedtak.kvalifisererForRevurdering(jobbParameter))) {
+      System.out.println("Vedtak " + aktivtVedtak.getVedtakId() + " kvalifiserer ikke for behandling");
       return null;
     }
+
+    System.out.println("Vedtak " + aktivtVedtak.getVedtakId() + " kvalifiserer for behandling");
+
+//    if (aktivtVedtak.getVedtakId() > 6) {
+//      System.out.println("Kaster exception");
+//      throw new RuntimeException("Programmert exception");
+//    }
 
     // Henter grunnlag for en gitt grunnlagspakke
     //TODO Her må det egentlig kjøres 3 kall mot bidrag-grunnlag (opprett/oppdater/hent) - bør vurdere et nytt endepunkt i bidrag-grunnlag for å
@@ -245,6 +254,7 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   }
 
   private static String standardmelding(AktivtVedtak aktivtVedtak) {
-    return "Vedtak med vedtakId " + aktivtVedtak.getVedtakId() + " og løpende forskudd " + aktivtVedtak.getBelop().intValueExact() + ": ";
+    return LocalTime.now().format(DateTimeFormatter.ISO_TIME) + ": Vedtak med aktivtVedtakId " + aktivtVedtak.getAktivtVedtakId()
+        + " og løpende forskudd " + aktivtVedtak.getBelop().intValueExact() + ": ";
   }
 }

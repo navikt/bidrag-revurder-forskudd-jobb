@@ -9,12 +9,13 @@ import java.util.Map;
 import javax.sql.DataSource;
 import no.nav.bidrag.commons.web.CorrelationIdFilter;
 import no.nav.bidrag.commons.web.HttpHeaderRestTemplate;
-import no.nav.bidrag.revurder.forskudd.jobb.beregn.consumer.BeregnConsumer;
+import no.nav.bidrag.revurder.forskudd.jobb.consumer.beregn.BeregnConsumer;
+import no.nav.bidrag.revurder.forskudd.jobb.consumer.grunnlag.GrunnlagConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.AktivtVedtak;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.AktivtVedtakRowMapper;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.JobbParameter;
 import no.nav.bidrag.revurder.forskudd.jobb.enums.InntektKategori;
-import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.consumer.GrunnlagConsumer;
+import no.nav.bidrag.revurder.forskudd.jobb.partitioner.ColumnRangePartitioner;
 import no.nav.bidrag.revurder.forskudd.jobb.processor.AktivtVedtakItemProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,9 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.integration.async.AsyncItemProcessor;
+import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.H2PagingQueryProvider;
@@ -36,6 +40,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 @Configuration
 @AutoConfigureWireMock(port = 8096)
@@ -52,77 +57,6 @@ public class BidragRevurderForskuddJobbConfig {
   @Autowired
   public DataSource dataSource;
 
-//  @Bean
-//  public JdbcCursorItemReader<AktivtVedtak> cursorItemReader() {
-//    JdbcCursorItemReader<AktivtVedtak> reader = new JdbcCursorItemReader<>();
-//
-//    reader.setSql("select * from aktivt_vedtak order by aktivt_vedtak_id");
-//    reader.setDataSource(this.dataSource);
-//    reader.setRowMapper(new AktivtVedtakRowMapper());
-//
-//    return reader;
-//  }
-
-  @Bean
-  public JobbParameter jobbParameter() {
-    return new JobbParameter(
-        LocalDate.now().minusYears(1),
-        LocalDate.now().plusMonths(2).withDayOfMonth(1),
-        InntektKategori.AINNTEKT
-    );
-  }
-
-  @Bean
-  public JdbcPagingItemReader<AktivtVedtak> itemReader() {
-    JdbcPagingItemReader<AktivtVedtak> reader = new JdbcPagingItemReader<>();
-
-    reader.setDataSource(this.dataSource);
-    reader.setFetchSize(10);
-    reader.setRowMapper(new AktivtVedtakRowMapper());
-
-    H2PagingQueryProvider queryProvider = new H2PagingQueryProvider();
-    queryProvider.setSelectClause("*");
-    queryProvider.setFromClause("aktivt_vedtak");
-
-    Map<String, Order> sortKeys = new HashMap<>(2);
-    sortKeys.put("aktivt_vedtak_id", Order.ASCENDING);
-
-    queryProvider.setSortKeys(sortKeys);
-
-    reader.setQueryProvider(queryProvider);
-
-    return reader;
-  }
-//
-//  @Bean
-//  public ItemWriter<String> itemWriter() {
-//    return items -> {
-//      for (String item : items) {
-//        System.out.println(item);
-//      }
-//    };
-//  }
-
-//  @Bean
-//  public JsonFileItemWriter<AktivtVedtak> itemWriter() throws IOException {
-//    JsonFileItemWriterBuilder<AktivtVedtak> builder = new JsonFileItemWriterBuilder<>();
-//    JacksonJsonObjectMarshaller<AktivtVedtak> marshaller = new JacksonJsonObjectMarshaller<>();
-//    String output = File.createTempFile("aktivtVedtakOutput", ".json").getAbsolutePath();
-//    return builder
-//        .name("aktivtVedtakItemWriter")
-//        .jsonObjectMarshaller(marshaller)
-//        .resource(new FileSystemResource(output))
-//        .build();
-//  }
-
-  @Bean
-  public FlatFileItemWriter<String> itemWriter() {
-    FlatFileItemWriter<String> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("src/main/resources/filer/vedtakforslag.txt"));
-    writer.setAppendAllowed(false);
-    writer.setLineAggregator(new PassThroughLineAggregator<>());
-    return writer;
-  }
 
   @Bean
   public CorrelationIdFilter correlationIdFilter() {
@@ -135,6 +69,13 @@ public class BidragRevurderForskuddJobbConfig {
     var httpHeaderRestTemplate = new HttpHeaderRestTemplate();
     httpHeaderRestTemplate.addHeaderGenerator(CorrelationIdFilter.CORRELATION_ID_HEADER, CorrelationIdFilter::fetchCorrelationIdForThread);
     return httpHeaderRestTemplate;
+  }
+
+  @Bean
+  public Options wireMockOptions() {
+    final WireMockConfiguration options = WireMockSpring.options();
+    options.port(8096);
+    return options;
   }
 
   @Bean
@@ -152,19 +93,143 @@ public class BidragRevurderForskuddJobbConfig {
   }
 
   @Bean
-  public AktivtVedtakItemProcessor itemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
+  public JobbParameter jobbParameter() {
+    return new JobbParameter(
+        LocalDate.now().minusYears(1),
+        LocalDate.now().plusMonths(2).withDayOfMonth(1),
+        InntektKategori.AINNTEKT
+    );
+  }
+
+  @Bean
+  public AktivtVedtakItemProcessor itemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer,
+      BeregnConsumer beregnConsumer) {
     return new AktivtVedtakItemProcessor(jobbParameter, grunnlagConsumer, beregnConsumer);
   }
 
+  @Bean
+  public AsyncItemProcessor asyncItemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer)
+      throws Exception {
+    AsyncItemProcessor<AktivtVedtak, String> asyncItemProcessor = new AsyncItemProcessor();
+    asyncItemProcessor.setDelegate(itemProcessor(jobbParameter, grunnlagConsumer, beregnConsumer));
+    asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
+    asyncItemProcessor.afterPropertiesSet();
+    return asyncItemProcessor;
+  }
+
+  @Bean
+  @StepScope
+  public AktivtVedtakItemProcessor localPartitioningItemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer,
+      BeregnConsumer beregnConsumer) {
+    return new AktivtVedtakItemProcessor(jobbParameter, grunnlagConsumer, beregnConsumer);
+  }
+
+  @Bean
+  public JdbcPagingItemReader<AktivtVedtak> itemReader() {
+
+    JdbcPagingItemReader<AktivtVedtak> reader = new JdbcPagingItemReader<>();
+
+    reader.setDataSource(this.dataSource);
+    reader.setFetchSize(500);
+    reader.setRowMapper(new AktivtVedtakRowMapper());
+
+    H2PagingQueryProvider queryProvider = new H2PagingQueryProvider();
+    queryProvider.setSelectClause("*");
+    queryProvider.setFromClause("aktivt_vedtak");
+
+    Map<String, Order> sortKeys = new HashMap<>(1);
+    sortKeys.put("aktivt_vedtak_id", Order.ASCENDING);
+
+    queryProvider.setSortKeys(sortKeys);
+
+    reader.setQueryProvider(queryProvider);
+
+    return reader;
+  }
+
+  @Bean
+  @StepScope
+  public JdbcPagingItemReader<AktivtVedtak> localPartitioningItemReader(
+      @Value("#{stepExecutionContext['minValue']}") Long minValue,
+      @Value("#{stepExecutionContext['maxValue']}") Long maxValue) {
+
+    System.out.println("reading " + minValue + " to " + maxValue);
+
+    JdbcPagingItemReader<AktivtVedtak> reader = new JdbcPagingItemReader<>();
+
+    reader.setDataSource(this.dataSource);
+    reader.setFetchSize(500);
+    reader.setRowMapper(new AktivtVedtakRowMapper());
+
+    H2PagingQueryProvider queryProvider = new H2PagingQueryProvider();
+    queryProvider.setSelectClause("*");
+    queryProvider.setFromClause("aktivt_vedtak");
+    queryProvider.setWhereClause("where aktivt_vedtak_id >= " + minValue + " and aktivt_vedtak_id < " + maxValue);
+
+    Map<String, Order> sortKeys = new HashMap<>(1);
+    sortKeys.put("aktivt_vedtak_id", Order.ASCENDING);
+
+    queryProvider.setSortKeys(sortKeys);
+
+    reader.setQueryProvider(queryProvider);
+
+    return reader;
+  }
+
 //  @Bean
-//  public ValidatingItemProcessor<AktivtVedtak> itemProcessor() {
-//    return new ValidatingItemProcessor<>(new AktivtVedtakValidator());
+//  public JdbcCursorItemReader<AktivtVedtak> cursorItemReader() {
+//    JdbcCursorItemReader<AktivtVedtak> reader = new JdbcCursorItemReader<>();
+//
+//    reader.setSql("select * from aktivt_vedtak order by aktivt_vedtak_id");
+//    reader.setDataSource(this.dataSource);
+//    reader.setRowMapper(new AktivtVedtakRowMapper());
+//
+//    return reader;
 //  }
 
   @Bean
-  public Step step1(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws IOException {
-    return stepBuilderFactory.get("step1")
-        .<AktivtVedtak, String>chunk(10)
+  public FlatFileItemWriter<String> itemWriter() {
+    FlatFileItemWriter<String> writer = new FlatFileItemWriter<>();
+    writer.setResource(new FileSystemResource("src/main/resources/filer/vedtakforslag.txt"));
+    writer.setAppendAllowed(false);
+    writer.setLineAggregator(new PassThroughLineAggregator<>());
+    return writer;
+  }
+
+  @Bean
+  public AsyncItemWriter asyncItemWriter() throws Exception {
+    AsyncItemWriter<String> asyncItemWriter = new AsyncItemWriter<>();
+    asyncItemWriter.setDelegate(itemWriter());
+    asyncItemWriter.afterPropertiesSet();
+    return asyncItemWriter;
+  }
+
+  @Bean
+  @StepScope
+  public FlatFileItemWriter<String> localPartitioningItemWriter() {
+    FlatFileItemWriter<String> writer = new FlatFileItemWriter<>();
+    writer.setResource(new FileSystemResource("src/main/resources/filer/vedtakforslag.txt"));
+    writer.setAppendAllowed(false);
+    writer.setLineAggregator(new PassThroughLineAggregator<>());
+    return writer;
+  }
+
+//  @Bean
+//  public JsonFileItemWriter<AktivtVedtak> itemWriter() throws IOException {
+//    JsonFileItemWriterBuilder<AktivtVedtak> builder = new JsonFileItemWriterBuilder<>();
+//    JacksonJsonObjectMarshaller<AktivtVedtak> marshaller = new JacksonJsonObjectMarshaller<>();
+//    String output = File.createTempFile("aktivtVedtakOutput", ".json").getAbsolutePath();
+//    return builder
+//        .name("aktivtVedtakItemWriter")
+//        .jsonObjectMarshaller(marshaller)
+//        .resource(new FileSystemResource(output))
+//        .build();
+//  }
+
+  @Bean
+  public Step sequentialProcessingStep(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
+    return stepBuilderFactory.get("step")
+        .<AktivtVedtak, String>chunk(500)
         .reader(itemReader())
         .processor(itemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
         .writer(itemWriter())
@@ -172,16 +237,80 @@ public class BidragRevurderForskuddJobbConfig {
   }
 
   @Bean
-  public Job job(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws IOException {
-    return jobBuilderFactory.get("job")
-        .start(step1(grunnlagConsumer, beregnConsumer))
+  public Step multiThreadedProcessingStep(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws IOException {
+    return stepBuilderFactory.get("step")
+        .<AktivtVedtak, String>chunk(500)
+        .reader(itemReader())
+        .processor(itemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .writer(itemWriter())
+        .taskExecutor(new SimpleAsyncTaskExecutor())
         .build();
   }
 
   @Bean
-  public Options wireMockOptions() {
-    final WireMockConfiguration options = WireMockSpring.options();
-    options.port(8096);
-    return options;
+  public Step asyncProcessingStep(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
+    return stepBuilderFactory.get("step")
+        .<AktivtVedtak, String>chunk(500)
+        .reader(itemReader())
+        .processor(asyncItemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .writer(asyncItemWriter())
+        .build();
   }
+
+  @Bean
+  public Step localPartitioningProcessingStep(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
+    return stepBuilderFactory.get("step")
+        .partitioner(slaveStep(grunnlagConsumer, beregnConsumer).getName(), partitioner())
+        .step(slaveStep(grunnlagConsumer, beregnConsumer))
+        .gridSize(4)
+        .taskExecutor(new SimpleAsyncTaskExecutor())
+        .build();
+  }
+
+  @Bean
+  public ColumnRangePartitioner partitioner() {
+    ColumnRangePartitioner columnRangePartitioner = new ColumnRangePartitioner();
+    columnRangePartitioner.setColumn("aktivt_vedtak_id");
+    columnRangePartitioner.setDataSource(dataSource);
+    columnRangePartitioner.setTable("aktivt_vedtak");
+    return columnRangePartitioner;
+  }
+
+  @Bean
+  public Step slaveStep(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
+    return stepBuilderFactory.get("slaveStep")
+        .<AktivtVedtak, String>chunk(500)
+        .reader(localPartitioningItemReader(null, null))
+        .processor(localPartitioningItemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .writer(localPartitioningItemWriter())
+        .build();
+  }
+
+  @Bean
+  public Job sequentialProcessingJob(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
+    return jobBuilderFactory.get("job")
+        .start(sequentialProcessingStep(grunnlagConsumer, beregnConsumer))
+        .build();
+  }
+
+//  @Bean
+//  public Job multiThreadedProcessingJob(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
+//    return jobBuilderFactory.get("job")
+//        .start(multiThreadedProcessingStep(grunnlagConsumer, beregnConsumer))
+//        .build();
+//  }
+
+//  @Bean
+//  public Job asyncProcessingJob(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
+//    return jobBuilderFactory.get("job")
+//        .start(asyncProcessingStep(grunnlagConsumer, beregnConsumer))
+//        .build();
+//  }
+
+//  @Bean
+//  public Job localPartitioningProcessingJob(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
+//    return jobBuilderFactory.get("job")
+//        .start(localPartitioningProcessingStep(grunnlagConsumer, beregnConsumer))
+//        .build();
+//  }
 }

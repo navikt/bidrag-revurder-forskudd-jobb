@@ -1,4 +1,4 @@
-package no.nav.bidrag.revurder.forskudd.jobb.beregn.consumer;
+package no.nav.bidrag.revurder.forskudd.jobb.consumer.beregn;
 
 import no.nav.bidrag.commons.web.HttpHeaderRestTemplate;
 import no.nav.bidrag.commons.web.HttpResponse;
@@ -39,6 +39,7 @@ public class BeregnConsumer {
           "Feil ved kall til bidrag-beregn-forskudd-rest API: " + e.getMessage() + ". Response body: " + e.getResponseBodyAsString();
       LOGGER.error(melding);
 //      throw new BidragBeregnConsumerException(melding, e.getStatusCode());
+      //TODO Legge til custom exception
       throw new RuntimeException(melding);
     }
   }

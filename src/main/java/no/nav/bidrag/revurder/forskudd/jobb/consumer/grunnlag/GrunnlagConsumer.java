@@ -1,4 +1,4 @@
-package no.nav.bidrag.revurder.forskudd.jobb.grunnlag.consumer;
+package no.nav.bidrag.revurder.forskudd.jobb.consumer.grunnlag;
 
 import no.nav.bidrag.commons.web.HttpHeaderRestTemplate;
 import no.nav.bidrag.commons.web.HttpResponse;
