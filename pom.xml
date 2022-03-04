@@ -93,13 +93,13 @@
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock-standalone.version}</version>
-      <!--      <scope>test</scope>-->
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
       <version>${springframework-cloud.version}</version>
-      <!--      <scope>test</scope>-->
+      <scope>test</scope>
     </dependency>
 
     <!-- Test -->

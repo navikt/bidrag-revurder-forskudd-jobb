@@ -6,4 +6,4 @@
 .settings/
 .vscode/
 /target/
-/src/main/resources/filer/vedtakforslag.txt
+**/vedtakforslag.txt

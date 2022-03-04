@@ -1,7 +1,5 @@
 package no.nav.bidrag.revurder.forskudd.jobb;
 
-import com.github.tomakehurst.wiremock.core.Options;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -34,8 +32,6 @@ import org.springframework.batch.item.file.transform.PassThroughLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RootUriTemplateHandler;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.cloud.contract.wiremock.WireMockSpring;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -43,7 +39,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 @Configuration
-@AutoConfigureWireMock(port = 8096)
 public class BidragRevurderForskuddJobbConfig {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BidragRevurderForskuddJobbConfig.class);
@@ -57,7 +52,6 @@ public class BidragRevurderForskuddJobbConfig {
   @Autowired
   public DataSource dataSource;
 
-
   @Bean
   public CorrelationIdFilter correlationIdFilter() {
     return new CorrelationIdFilter();
@@ -69,13 +63,6 @@ public class BidragRevurderForskuddJobbConfig {
     var httpHeaderRestTemplate = new HttpHeaderRestTemplate();
     httpHeaderRestTemplate.addHeaderGenerator(CorrelationIdFilter.CORRELATION_ID_HEADER, CorrelationIdFilter::fetchCorrelationIdForThread);
     return httpHeaderRestTemplate;
-  }
-
-  @Bean
-  public Options wireMockOptions() {
-    final WireMockConfiguration options = WireMockSpring.options();
-    options.port(8096);
-    return options;
   }
 
   @Bean
@@ -190,7 +177,7 @@ public class BidragRevurderForskuddJobbConfig {
   @Bean
   public FlatFileItemWriter<String> itemWriter() {
     FlatFileItemWriter<String> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("src/main/resources/filer/vedtakforslag.txt"));
+    writer.setResource(new FileSystemResource("src/test/resources/springbatch/filer/vedtakforslag.txt"));
     writer.setAppendAllowed(false);
     writer.setLineAggregator(new PassThroughLineAggregator<>());
     return writer;
@@ -208,7 +195,7 @@ public class BidragRevurderForskuddJobbConfig {
   @StepScope
   public FlatFileItemWriter<String> localPartitioningItemWriter() {
     FlatFileItemWriter<String> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("src/main/resources/filer/vedtakforslag.txt"));
+    writer.setResource(new FileSystemResource("src/test/resources/springbatch/filer/vedtakforslag.txt"));
     writer.setAppendAllowed(false);
     writer.setLineAggregator(new PassThroughLineAggregator<>());
     return writer;
