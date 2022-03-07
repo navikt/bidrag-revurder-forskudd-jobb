@@ -30,15 +30,23 @@ import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentKomplettGrunnlagspa
 import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentPersondataResponse;
 import no.nav.bidrag.revurder.forskudd.jobb.grunnlag.api.HentSkattegrunnlagResponse;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Value;
 
 public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, String> {
 
-  private final JobbParameter jobbParameter;
+  @Value("#{jobParameters['sisteMuligeDatoForSisteVedtak']}")
+  private String sisteMuligeDatoForSisteVedtak;
+
+  @Value("#{jobParameters['virkningsdato']}")
+  private String virkningsdato;
+
+  @Value("#{jobParameters['inntektskategori']}")
+  private String inntektskategori;
+
   private final GrunnlagConsumer grunnlagConsumer;
   private final BeregnConsumer beregnConsumer;
 
-  public AktivtVedtakItemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
-    this.jobbParameter = jobbParameter;
+  public AktivtVedtakItemProcessor(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
     this.grunnlagConsumer = grunnlagConsumer;
     this.beregnConsumer = beregnConsumer;
   }
@@ -46,6 +54,8 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   @Override
   public String process(AktivtVedtak aktivtVedtak) {
 
+    JobbParameter jobbParameter = new JobbParameter(LocalDate.parse(sisteMuligeDatoForSisteVedtak), LocalDate.parse(virkningsdato),
+        InntektKategori.valueOf(inntektskategori));
     if (!(aktivtVedtak.kvalifisererForRevurdering(jobbParameter))) {
       System.out.println("Vedtak " + aktivtVedtak.getVedtakId() + " kvalifiserer ikke for behandling");
       return null;
@@ -71,7 +81,7 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
 
     // Bygger opp request til kall av beregning
     //TODO Håndtere at hentKomplettGrunnlagspakkeResponse er null
-    var beregnForskuddRequest = byggBeregnForskuddGrunnlag(hentKomplettGrunnlagspakkeResponse, aktivtVedtak, jobbParameter.getInntektKategori());
+    var beregnForskuddRequest = byggBeregnForskuddGrunnlag(hentKomplettGrunnlagspakkeResponse, aktivtVedtak, jobbParameter);
     System.out.println("Kaller beregn forskudd med følgende grunnlag: " + beregnForskuddRequest);
 
     // Beregner forskudd
@@ -99,12 +109,12 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   }
 
   private BeregnForskuddGrunnlag byggBeregnForskuddGrunnlag(HentKomplettGrunnlagspakkeResponse hentKomplettGrunnlagspakkeResponse,
-      AktivtVedtak aktivtVedtak, InntektKategori inntektKategori) {
+      AktivtVedtak aktivtVedtak, JobbParameter jobbParameter) {
     var grunnlagListe = new ArrayList<Grunnlag>();
     grunnlagListe.add(byggGenerellInfoGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), jobbParameter.getVirkningsdato()));
     grunnlagListe.add(byggBostatusGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), jobbParameter.getVirkningsdato()));
     //TODO Inntekter må gjennomgås med tanke på mapping, filtrering og summering
-    switch (inntektKategori) {
+    switch (jobbParameter.getInntektKategori()) {
       case AINNTEKT -> grunnlagListe.addAll(
           byggInntektGrunnlagAinntekt(hentKomplettGrunnlagspakkeResponse.getAinntektListe(), jobbParameter.getVirkningsdato()));
       case SIGRUN -> grunnlagListe.addAll(
@@ -194,8 +204,8 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
     return new Grunnlag(referanse, type, mapper.valueToTree(new Sivilstand(rolle, datoFom, null, sivilstandKode)));
   }
 
-  //TODO Verfifisere regelverk for bruk av sisvilstand
-  //Regelverk for å sette sisvilstand:
+  //TODO Verfifisere regelverk for bruk av sivilstand
+  //Regelverk for å sette sivilstand:
   // - hvis dato for siste manuelle vedtak er nyere enn dato for siste oppdatering av sivilstand i PDL, brukes sivilstand fra siste manuelle vedtak
   // - ellers brukes sivilstand fra PDL
   // - unntak: hvis sivilstand fra siste manuelle vedtak er SAMBOER og sivilstand fra PDL er noe annet enn GIFT, settes sivilstand til SAMBOER

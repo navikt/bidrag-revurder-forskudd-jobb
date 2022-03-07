@@ -15,6 +15,6 @@ public class BidragRevurderForskuddJobbLocal {
     SpringApplication app = new SpringApplication(BidragRevurderForskuddJobbLocal.class);
     app.setAdditionalProfiles(LOCAL);
     ConfigurableApplicationContext context = app.run(args);
-    SpringApplication.exit(context);
+//    SpringApplication.exit(context);
   }
 }

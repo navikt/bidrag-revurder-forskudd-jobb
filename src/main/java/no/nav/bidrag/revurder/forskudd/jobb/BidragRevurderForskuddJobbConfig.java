@@ -1,7 +1,6 @@
 package no.nav.bidrag.revurder.forskudd.jobb;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -11,8 +10,6 @@ import no.nav.bidrag.revurder.forskudd.jobb.consumer.beregn.BeregnConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.consumer.grunnlag.GrunnlagConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.AktivtVedtak;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.AktivtVedtakRowMapper;
-import no.nav.bidrag.revurder.forskudd.jobb.domene.JobbParameter;
-import no.nav.bidrag.revurder.forskudd.jobb.enums.InntektKategori;
 import no.nav.bidrag.revurder.forskudd.jobb.partitioner.ColumnRangePartitioner;
 import no.nav.bidrag.revurder.forskudd.jobb.processor.AktivtVedtakItemProcessor;
 import org.slf4j.Logger;
@@ -80,25 +77,15 @@ public class BidragRevurderForskuddJobbConfig {
   }
 
   @Bean
-  public JobbParameter jobbParameter() {
-    return new JobbParameter(
-        LocalDate.now().minusYears(1),
-        LocalDate.now().plusMonths(2).withDayOfMonth(1),
-        InntektKategori.AINNTEKT
-    );
+  @StepScope
+  public AktivtVedtakItemProcessor itemProcessor(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
+    return new AktivtVedtakItemProcessor(grunnlagConsumer, beregnConsumer);
   }
 
   @Bean
-  public AktivtVedtakItemProcessor itemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer,
-      BeregnConsumer beregnConsumer) {
-    return new AktivtVedtakItemProcessor(jobbParameter, grunnlagConsumer, beregnConsumer);
-  }
-
-  @Bean
-  public AsyncItemProcessor asyncItemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer)
-      throws Exception {
+  public AsyncItemProcessor asyncItemProcessor(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
     AsyncItemProcessor<AktivtVedtak, String> asyncItemProcessor = new AsyncItemProcessor();
-    asyncItemProcessor.setDelegate(itemProcessor(jobbParameter, grunnlagConsumer, beregnConsumer));
+    asyncItemProcessor.setDelegate(itemProcessor(grunnlagConsumer, beregnConsumer));
     asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
     asyncItemProcessor.afterPropertiesSet();
     return asyncItemProcessor;
@@ -106,9 +93,8 @@ public class BidragRevurderForskuddJobbConfig {
 
   @Bean
   @StepScope
-  public AktivtVedtakItemProcessor localPartitioningItemProcessor(JobbParameter jobbParameter, GrunnlagConsumer grunnlagConsumer,
-      BeregnConsumer beregnConsumer) {
-    return new AktivtVedtakItemProcessor(jobbParameter, grunnlagConsumer, beregnConsumer);
+  public AktivtVedtakItemProcessor localPartitioningItemProcessor(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
+    return new AktivtVedtakItemProcessor(grunnlagConsumer, beregnConsumer);
   }
 
   @Bean
@@ -218,7 +204,7 @@ public class BidragRevurderForskuddJobbConfig {
     return stepBuilderFactory.get("step")
         .<AktivtVedtak, String>chunk(500)
         .reader(itemReader())
-        .processor(itemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .processor(itemProcessor(grunnlagConsumer, beregnConsumer))
         .writer(itemWriter())
         .build();
   }
@@ -228,7 +214,7 @@ public class BidragRevurderForskuddJobbConfig {
     return stepBuilderFactory.get("step")
         .<AktivtVedtak, String>chunk(500)
         .reader(itemReader())
-        .processor(itemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .processor(itemProcessor(grunnlagConsumer, beregnConsumer))
         .writer(itemWriter())
         .taskExecutor(new SimpleAsyncTaskExecutor())
         .build();
@@ -239,7 +225,7 @@ public class BidragRevurderForskuddJobbConfig {
     return stepBuilderFactory.get("step")
         .<AktivtVedtak, String>chunk(500)
         .reader(itemReader())
-        .processor(asyncItemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .processor(asyncItemProcessor(grunnlagConsumer, beregnConsumer))
         .writer(asyncItemWriter())
         .build();
   }
@@ -268,7 +254,7 @@ public class BidragRevurderForskuddJobbConfig {
     return stepBuilderFactory.get("slaveStep")
         .<AktivtVedtak, String>chunk(500)
         .reader(localPartitioningItemReader(null, null))
-        .processor(localPartitioningItemProcessor(jobbParameter(), grunnlagConsumer, beregnConsumer))
+        .processor(localPartitioningItemProcessor(grunnlagConsumer, beregnConsumer))
         .writer(localPartitioningItemWriter())
         .build();
   }
