@@ -13,4 +13,4 @@ data class HentSkattegrunnlagResponse(
   val brukTil: LocalDateTime?,
   val hentetTidspunkt: LocalDateTime,
   val skattegrunnlagListe: List<HentSkattegrunnlagspostResponse>
-  )
+)

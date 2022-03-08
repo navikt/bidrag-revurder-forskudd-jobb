@@ -96,7 +96,6 @@ public class BidragRevurderForskuddJobbConfig {
 //  }
 
   @Bean
-//  public JdbcPagingItemReader<AktivtVedtak> itemReader() {
   public JdbcPagingItemReader<AktivtVedtak> itemReader() {
 
     JdbcPagingItemReader<AktivtVedtak> reader = new JdbcPagingItemReader<>();
@@ -160,9 +159,10 @@ public class BidragRevurderForskuddJobbConfig {
 //  }
 
   @Bean
-  public FlatFileItemWriter<String> itemWriter() {
+  @StepScope
+  public FlatFileItemWriter<String> itemWriter(@Value("#{jobParameters['filLokasjon']}") String filLokasjon) {
     FlatFileItemWriter<String> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("src/test/resources/springbatch/filer/vedtakforslag.txt"));
+    writer.setResource(new FileSystemResource(filLokasjon));
     writer.setAppendAllowed(false);
     writer.setLineAggregator(new PassThroughLineAggregator<>());
     return writer;
@@ -200,12 +200,11 @@ public class BidragRevurderForskuddJobbConfig {
 
   @Bean
   public Step sequentialProcessingStep(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
-//  public Step sequentialProcessingStep(StepBuilderFactory stepBuilderFactory, GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) {
     return stepBuilderFactory.get("step")
         .<AktivtVedtak, String>chunk(500)
         .reader(itemReader())
         .processor(itemProcessor(grunnlagConsumer, beregnConsumer))
-        .writer(itemWriter())
+        .writer(itemWriter(null))
         .build();
   }
 
@@ -262,11 +261,8 @@ public class BidragRevurderForskuddJobbConfig {
   @Bean
   @Primary
   public Job sequentialProcessingJob(GrunnlagConsumer grunnlagConsumer, BeregnConsumer beregnConsumer) throws Exception {
-//  public Job sequentialProcessingJob(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, GrunnlagConsumer grunnlagConsumer,
-//      BeregnConsumer beregnConsumer) {
     return jobBuilderFactory.get("job")
         .start(sequentialProcessingStep(grunnlagConsumer, beregnConsumer))
-//        .start(sequentialProcessingStep(stepBuilderFactory, grunnlagConsumer, beregnConsumer))
         .build();
   }
 

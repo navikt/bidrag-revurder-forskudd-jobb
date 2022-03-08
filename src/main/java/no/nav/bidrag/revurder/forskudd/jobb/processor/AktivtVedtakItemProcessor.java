@@ -18,7 +18,6 @@ import no.nav.bidrag.revurder.forskudd.jobb.beregn.dto.Sivilstand;
 import no.nav.bidrag.revurder.forskudd.jobb.consumer.beregn.BeregnConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.consumer.grunnlag.GrunnlagConsumer;
 import no.nav.bidrag.revurder.forskudd.jobb.domene.AktivtVedtak;
-import no.nav.bidrag.revurder.forskudd.jobb.domene.JobbParameter;
 import no.nav.bidrag.revurder.forskudd.jobb.enums.BeregnForskuddGrunnlagType;
 import no.nav.bidrag.revurder.forskudd.jobb.enums.InntektKategori;
 import no.nav.bidrag.revurder.forskudd.jobb.enums.InntektType;
@@ -40,8 +39,8 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   @Value("#{jobParameters['virkningsdato']}")
   private String virkningsdato;
 
-  @Value("#{jobParameters['inntektskategori']}")
-  private String inntektskategori;
+  @Value("#{jobParameters['inntektKategori']}")
+  private String inntektKategori;
 
   private final GrunnlagConsumer grunnlagConsumer;
   private final BeregnConsumer beregnConsumer;
@@ -54,9 +53,7 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   @Override
   public String process(AktivtVedtak aktivtVedtak) {
 
-    JobbParameter jobbParameter = new JobbParameter(LocalDate.parse(sisteMuligeDatoForSisteVedtak), LocalDate.parse(virkningsdato),
-        InntektKategori.valueOf(inntektskategori));
-    if (!(aktivtVedtak.kvalifisererForRevurdering(jobbParameter))) {
+    if (!(aktivtVedtak.kvalifisererForRevurdering(LocalDate.parse(sisteMuligeDatoForSisteVedtak), LocalDate.parse(virkningsdato)))) {
       System.out.println("Vedtak " + aktivtVedtak.getVedtakId() + " kvalifiserer ikke for behandling");
       return null;
     }
@@ -75,13 +72,13 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
     System.out.println("Hentet følgende grunnlagspakke: " + hentKomplettGrunnlagspakkeResponse);
 
     // Filtrerer bort vedtak som ikke skal revurderes basert på grunnlagsdata
-    if (vedtakSkalFiltreresBortBasertPaaGrunnlag(aktivtVedtak, hentKomplettGrunnlagspakkeResponse, jobbParameter.getInntektKategori())) {
+    if (vedtakSkalFiltreresBortBasertPaaGrunnlag(aktivtVedtak, hentKomplettGrunnlagspakkeResponse, InntektKategori.valueOf(inntektKategori))) {
       return null;
     }
 
     // Bygger opp request til kall av beregning
     //TODO Håndtere at hentKomplettGrunnlagspakkeResponse er null
-    var beregnForskuddRequest = byggBeregnForskuddGrunnlag(hentKomplettGrunnlagspakkeResponse, aktivtVedtak, jobbParameter);
+    var beregnForskuddRequest = byggBeregnForskuddGrunnlag(hentKomplettGrunnlagspakkeResponse, aktivtVedtak);
     System.out.println("Kaller beregn forskudd med følgende grunnlag: " + beregnForskuddRequest);
 
     // Beregner forskudd
@@ -109,21 +106,21 @@ public class AktivtVedtakItemProcessor implements ItemProcessor<AktivtVedtak, St
   }
 
   private BeregnForskuddGrunnlag byggBeregnForskuddGrunnlag(HentKomplettGrunnlagspakkeResponse hentKomplettGrunnlagspakkeResponse,
-      AktivtVedtak aktivtVedtak, JobbParameter jobbParameter) {
+      AktivtVedtak aktivtVedtak) {
     var grunnlagListe = new ArrayList<Grunnlag>();
-    grunnlagListe.add(byggGenerellInfoGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), jobbParameter.getVirkningsdato()));
-    grunnlagListe.add(byggBostatusGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), jobbParameter.getVirkningsdato()));
+    grunnlagListe.add(byggGenerellInfoGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), LocalDate.parse(virkningsdato)));
+    grunnlagListe.add(byggBostatusGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), LocalDate.parse(virkningsdato)));
     //TODO Inntekter må gjennomgås med tanke på mapping, filtrering og summering
-    switch (jobbParameter.getInntektKategori()) {
+    switch (InntektKategori.valueOf(inntektKategori)) {
       case AINNTEKT -> grunnlagListe.addAll(
-          byggInntektGrunnlagAinntekt(hentKomplettGrunnlagspakkeResponse.getAinntektListe(), jobbParameter.getVirkningsdato()));
+          byggInntektGrunnlagAinntekt(hentKomplettGrunnlagspakkeResponse.getAinntektListe(), LocalDate.parse(virkningsdato)));
       case SIGRUN -> grunnlagListe.addAll(
-          byggInntektGrunnlagSigrun(hentKomplettGrunnlagspakkeResponse.getSkattegrunnlagListe(), jobbParameter.getVirkningsdato()));
+          byggInntektGrunnlagSigrun(hentKomplettGrunnlagspakkeResponse.getSkattegrunnlagListe(), LocalDate.parse(virkningsdato)));
     }
-    grunnlagListe.add(byggSivilstandGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), aktivtVedtak, jobbParameter.getVirkningsdato()));
-    grunnlagListe.add(byggBarnIHusstandGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), jobbParameter.getVirkningsdato()));
+    grunnlagListe.add(byggSivilstandGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), aktivtVedtak, LocalDate.parse(virkningsdato)));
+    grunnlagListe.add(byggBarnIHusstandGrunnlag(hentKomplettGrunnlagspakkeResponse.getPersondata(), LocalDate.parse(virkningsdato)));
 
-    return new BeregnForskuddGrunnlag(jobbParameter.getVirkningsdato(), null, grunnlagListe);
+    return new BeregnForskuddGrunnlag(LocalDate.parse(virkningsdato), null, grunnlagListe);
   }
 
   private Grunnlag byggGenerellInfoGrunnlag(HentPersondataResponse persondata, LocalDate virkningsdato) {

@@ -6,5 +6,6 @@ import java.time.LocalDate
 data class JobbParameter(
   val sisteMuligeDatoForSisteVedtak: LocalDate,
   val virkningsdato: LocalDate,
-  val inntektKategori: InntektKategori
+  val inntektKategori: InntektKategori,
+  val filLokasjon: String
 )

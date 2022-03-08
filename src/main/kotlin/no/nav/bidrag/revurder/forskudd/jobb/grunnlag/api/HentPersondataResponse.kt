@@ -17,4 +17,4 @@ data class HentPersondataResponse(
   val soknadsbarnBostatus: String = "",
   val soknadsbarnFodselsdato: LocalDate = LocalDate.now(),
   val hentetTidspunkt: LocalDateTime = LocalDateTime.now()
-  )
+)

@@ -28,5 +28,4 @@ public class AktivtVedtakRowMapper implements RowMapper<AktivtVedtak> {
         resultSet.getTimestamp("opprettet_timestamp").toLocalDateTime()
     );
   }
-
 }

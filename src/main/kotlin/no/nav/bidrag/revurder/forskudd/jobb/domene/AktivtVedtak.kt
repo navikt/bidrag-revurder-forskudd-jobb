@@ -31,8 +31,8 @@ data class AktivtVedtak(
   // - Søknadsbarnet er under 18 år
   // - Dato for siste manuelle vedtak må ikke være etter siste aktuelle dato (parameterverdi)
   // - Søknadsbarnet kan ikke ha unntakskoder
-  fun kvalifisererForRevurdering(jobbParameter: JobbParameter): Boolean {
-    return (soknadsbarnetErUnder18Aar(jobbParameter.virkningsdato) && sisteManuelleVedtakErGammeltNok(jobbParameter.sisteMuligeDatoForSisteVedtak) &&
+  fun kvalifisererForRevurdering(sisteMuligeDatoForSisteVedtak: LocalDate, virkningsdato: LocalDate): Boolean {
+    return (soknadsbarnetErUnder18Aar(virkningsdato) && sisteManuelleVedtakErGammeltNok(sisteMuligeDatoForSisteVedtak) &&
         (!soknadsbarnHarUnntakskode))
   }
 

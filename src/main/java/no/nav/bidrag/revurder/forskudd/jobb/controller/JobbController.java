@@ -26,10 +26,11 @@ public class JobbController {
     JobParameters jobParameters = new JobParametersBuilder()
         .addString("sisteMuligeDatoForSisteVedtak", LocalDate.now().minusYears(1).toString())
         .addString("virkningsdato", LocalDate.now().plusMonths(2).withDayOfMonth(1).toString())
-        .addString("inntektskategori", InntektKategori.AINNTEKT.toString())
+        .addString("inntektKategori", InntektKategori.AINNTEKT.toString())
+        .addString("filLokasjon", "src/test/resources/springbatch/filer/vedtakforslag.txt")
         .toJobParameters();
-    jobLauncher.run(revurderForskuddJobb, jobParameters);
 
-    return "Revurder forskudd batchjobb ble startet";
+    var jobExecution = jobLauncher.run(revurderForskuddJobb, jobParameters);
+    return "Revurder forskudd batchjobb ble utført med følgende exit status: " + jobExecution.getExitStatus();
   }
 }

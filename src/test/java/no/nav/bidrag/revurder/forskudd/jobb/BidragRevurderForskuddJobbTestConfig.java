@@ -1,6 +1,5 @@
 package no.nav.bidrag.revurder.forskudd.jobb;
 
-
 import static no.nav.bidrag.revurder.forskudd.jobb.BidragRevurderForskuddJobbTest.TEST;
 
 import com.github.tomakehurst.wiremock.core.Options;
@@ -13,9 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile({TEST})
+@Profile(TEST)
 @Configuration
-//@AutoConfigureWireMock(port = 8096)
 public class BidragRevurderForskuddJobbTestConfig {
 
   @Bean
@@ -30,13 +28,4 @@ public class BidragRevurderForskuddJobbTestConfig {
     options.port(8096);
     return options;
   }
-
-//  @Bean
-//  public DataSource dataSource() {
-//    return new EmbeddedDatabaseBuilder()
-//        .setType(EmbeddedDatabaseType.H2)
-//        .addScript("/org/springframework/batch/core/schema-h2.sql")
-//        .addScript("schema.sql")
-//        .build();
-//  }
 }
