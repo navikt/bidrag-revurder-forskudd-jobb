@@ -7,15 +7,15 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @EnableBatchProcessing
-public class BidragRevurderForskuddJobb {
+public class BidragRevurderForskuddJobbTest {
+
+  public static final String TEST = "test";
 
   public static void main(String[] args) {
-//    SpringApplication.run(BidragRevurderForskuddJobb.class, args);
-
-    SpringApplication app = new SpringApplication(BidragRevurderForskuddJobb.class);
+    SpringApplication app = new SpringApplication(BidragRevurderForskuddJobbTest.class);
+    app.setAdditionalProfiles(TEST);
+    String testResource = "/resources/testconfig/";
     ConfigurableApplicationContext context = app.run(args);
 //    SpringApplication.exit(context);
-//    context.getBean(GrunnlagConsumerApiStub.class).settOppGrunnlagStub();
-//    context.getBean(BeregningApiStub.class).settOppBeregningStub();
   }
 }

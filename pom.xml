@@ -24,6 +24,7 @@
 
     <!-- Avhengigheter -->
     <bidrag-commons.version>0.5.19</bidrag-commons.version>
+    <bidrag-commons.test.version>0.2.2</bidrag-commons.test.version>
     <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
     <springframework-cloud.version>2.2.3.RELEASE</springframework-cloud.version>
     <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
@@ -62,6 +63,13 @@
       <groupId>no.nav.bidrag</groupId>
       <artifactId>bidrag-commons</artifactId>
       <version>${bidrag-commons.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>no.nav.bidrag</groupId>
+      <artifactId>bidrag-commons-test</artifactId>
+      <version>${bidrag-commons.test.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Database -->
