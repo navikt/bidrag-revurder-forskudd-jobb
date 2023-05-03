@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.3</version>
+    <version>3.0.6</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -23,13 +23,20 @@
     <kotlin.version>1.6.10</kotlin.version>
 
     <!-- Avhengigheter -->
-    <bidrag-commons.version>0.5.19</bidrag-commons.version>
-    <bidrag-commons.test.version>0.2.2</bidrag-commons.test.version>
-    <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
-    <springframework-cloud.version>2.2.3.RELEASE</springframework-cloud.version>
-    <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
-    <spring-boot-maven-plugin.version>2.6.3</spring-boot-maven-plugin.version>
+    <bidrag-commons.version>20230427084654_4121ef0</bidrag-commons.version>
+    <bidrag-commons.test.version>1.20230217164307_1ec9d3f</bidrag-commons.test.version>
+    <wiremock-standalone.version>3.0.0-beta-8</wiremock-standalone.version>
+    <springframework-cloud.version>4.0.2</springframework-cloud.version>
+    <maven-surefire-plugin.version>3.0.0-M8</maven-surefire-plugin.version>
+    <spring-boot-maven-plugin.version>3.0.6</spring-boot-maven-plugin.version>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/navikt/bidrag-commons</url>
+    </repository>
+  </repositories>
 
   <dependencies>
 
