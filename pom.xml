@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.6</version>
+    <version>3.1.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -20,11 +20,11 @@
   <properties>
     <!-- Språk -->
     <java.version>17</java.version>
-    <kotlin.version>1.6.10</kotlin.version>
+    <kotlin.version>1.8.21</kotlin.version>
 
     <!-- Avhengigheter -->
-    <bidrag-commons.version>20230427084654_4121ef0</bidrag-commons.version>
-    <bidrag-commons.test.version>1.20230217164307_1ec9d3f</bidrag-commons.test.version>
+    <bidrag-commons.version>20230516121246_1e60457</bidrag-commons.version>
+    <bidrag-commons.test.version>1.20230511093912_dc35d81</bidrag-commons.test.version>
     <wiremock-standalone.version>3.0.0-beta-8</wiremock-standalone.version>
     <springframework-cloud.version>4.0.2</springframework-cloud.version>
     <maven-surefire-plugin.version>3.0.0-M8</maven-surefire-plugin.version>
@@ -176,7 +176,7 @@
             <plugin>spring</plugin>
             <plugin>jpa</plugin>
           </compilerPlugins>
-          <jvmTarget>1.8</jvmTarget>
+          <jvmTarget>17</jvmTarget>
         </configuration>
         <dependencies>
           <dependency>

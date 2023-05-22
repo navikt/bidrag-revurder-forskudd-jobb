@@ -28,7 +28,7 @@ public class GrunnlagConsumer {
 
     try {
       var response = restTemplate.exchange(uri, HttpMethod.GET, null, RESPONSE_HENT_GRUNNLAGSPAKKE);
-      return HttpResponse.from(response.getStatusCode(), response.getBody());
+      return HttpResponse.Companion.from(response.getStatusCode(), response.getBody());
     } catch (HttpClientErrorException e) {
       var melding =
           "Feil ved kall til bidrag-grunnlag hent grunnlagspakke API: " + e.getMessage() + ". Response body: " + e.getResponseBodyAsString();

@@ -33,7 +33,7 @@ public class BeregnConsumer {
 
     try {
       var response = restTemplate.exchange(uri, HttpMethod.POST, request, RESPONSE_BEREGN_FORSKUDD);
-      return HttpResponse.from(response.getStatusCode(), response.getBody());
+      return HttpResponse.Companion.from(response.getStatusCode(), response.getBody());
     } catch (HttpClientErrorException e) {
       var melding =
           "Feil ved kall til bidrag-beregn-forskudd-rest API: " + e.getMessage() + ". Response body: " + e.getResponseBodyAsString();
